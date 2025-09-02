@@ -56,7 +56,6 @@ coverage.xml
 *.pot
 
 # Django stuff:
-*.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -129,12 +128,15 @@ dmypy.json
 .pyre/
 
 # Project specific
-logs/
-*.log
 data/historical_data/
 data/backtest_results/
 .DS_Store
 *.csv
 *.json
+api_key.json
 temp/
 cache/
+
+# Keep logs directory but optionally ignore large log files
+# Uncomment the next line if you don't want to commit log files
+# logs/*.log

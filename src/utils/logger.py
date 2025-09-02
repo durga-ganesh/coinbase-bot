@@ -23,17 +23,21 @@ def get_logger(name: str, level: Optional[str] = None) -> logging.Logger:
     logger = logging.getLogger(name)
     
     if not logger.handlers:
+        # Get log file from environment or use default
+        log_file = os.getenv('LOG_FILE', 'logs/bot.log')
+        
         # Create logs directory if it doesn't exist
-        log_dir = "logs"
-        os.makedirs(log_dir, exist_ok=True)
+        log_dir = os.path.dirname(log_file)
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
         
         # Set level from environment or parameter
         log_level = level or os.getenv('LOG_LEVEL', 'INFO')
         logger.setLevel(getattr(logging, log_level.upper()))
         
-        # Create formatter
+        # Create formatter with fixed-width columns for better readability
         formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            '%(asctime)s | %(levelname)-5s | %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
         
@@ -43,8 +47,6 @@ def get_logger(name: str, level: Optional[str] = None) -> logging.Logger:
         logger.addHandler(console_handler)
         
         # File handler
-        today = datetime.now().strftime('%Y-%m-%d')
-        log_file = os.path.join(log_dir, f'trading-{today}.log')
         file_handler = logging.FileHandler(log_file)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
@@ -65,13 +67,23 @@ def setup_logging(config_file: Optional[str] = None):
     if config_file and os.path.exists(config_file):
         logging.config.fileConfig(config_file)
     else:
+        # Get log file from environment or use default
+        log_file = os.getenv('LOG_FILE', 'logs/bot.log')
+        log_level = os.getenv('LOG_LEVEL', 'INFO')
+        
+        # Create logs directory if it doesn't exist
+        log_dir = os.path.dirname(log_file)
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
+        
         # Default configuration
         logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            level=getattr(logging, log_level.upper()),
+            format='%(asctime)s | %(levelname)-5s | %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
             handlers=[
                 logging.StreamHandler(),
-                logging.FileHandler(f'logs/trading-{datetime.now().strftime("%Y-%m-%d")}.log')
+                logging.FileHandler(log_file)
             ]
         )
 

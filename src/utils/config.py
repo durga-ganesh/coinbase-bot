@@ -71,7 +71,7 @@ class Config:
         """
         try:
             if not os.path.exists(config_path):
-                logger.warning(f"Config file {config_path} not found, using defaults")
+                logger.warning(f"[CONF ] Config file {config_path} not found, using defaults")
                 return cls()
                 
             with open(config_path, 'r') as f:
@@ -91,11 +91,11 @@ class Config:
                 strategies=config_data.get('strategies', {})
             )
             
-            logger.info(f"Configuration loaded from {config_path}")
+            logger.info(f"[CONF ] Configuration loaded from {config_path}")
             return config
             
         except Exception as e:
-            logger.error(f"Failed to load configuration: {e}")
+            logger.error(f"[CONF ] Failed to load configuration: {e}")
             raise ConfigurationError(f"Failed to load configuration: {e}")
     
     @classmethod
@@ -141,7 +141,7 @@ class Config:
             )
             
         except Exception as e:
-            logger.error(f"Failed to load configuration from environment: {e}")
+            logger.error(f"[CONF ] Failed to load configuration from environment: {e}")
             raise ConfigurationError(f"Failed to load configuration from environment: {e}")
     
     def to_file(self, config_path: str):
@@ -187,10 +187,10 @@ class Config:
             with open(config_path, 'w') as f:
                 yaml.dump(config_data, f, default_flow_style=False, indent=2)
             
-            logger.info(f"Configuration saved to {config_path}")
+            logger.info(f"[CONF ] Configuration saved to {config_path}")
             
         except Exception as e:
-            logger.error(f"Failed to save configuration: {e}")
+            logger.error(f"[CONF ] Failed to save configuration: {e}")
             raise ConfigurationError(f"Failed to save configuration: {e}")
     
     def get_strategy_config(self, strategy_name: str) -> Dict[str, Any]:
@@ -214,7 +214,7 @@ class Config:
             config: Strategy configuration dictionary
         """
         self.strategies[strategy_name] = config
-        logger.info(f"Updated configuration for strategy: {strategy_name}")
+        logger.info(f"[CONF ] Updated configuration for strategy: {strategy_name}")
 
 
 def load_config(config_path: Optional[str] = None) -> Config:

@@ -1,0 +1,18 @@
+2025-09-01 18:00:11 | INFO  | [CONF ] Configuration loaded from config/config.yaml
+2025-09-01 18:00:11 | INFO  | [BOT  ] Configuration loaded successfully
+2025-09-01 18:00:11 | INFO  | [OPER ] Running system health check
+2025-09-01 18:00:11 | INFO  | [AUTH ] Loaded credentials from JSON file: /Users/dganesh/Documents/projects/coinbase-bot/api_key.json
+2025-09-01 18:00:11 | INFO  | [BOT  ] Coinbase client initialized (sandbox: True)
+2025-09-01 18:00:11 | INFO  | [API  ] Starting health_check()
+2025-09-01 18:00:11 | INFO  | [API  ] Starting get_accounts()
+2025-09-01 18:00:11 | INFO  | [API  ] Completed get_accounts in 0.384s - Returned 49 items
+2025-09-01 18:00:11 | INFO  | [API  ] Completed health_check in 0.384s - Value: True
+
+2025-09-01 18:00:31 | INFO  | [CONF ] Configuration loaded from config/config.yaml
+2025-09-01 18:00:31 | INFO  | [BOT  ] Configuration loaded successfully
+2025-09-01 18:00:31 | INFO  | [OPER ] Getting account balances
+2025-09-01 18:00:31 | INFO  | [AUTH ] Loaded credentials from JSON file: /Users/dganesh/Documents/projects/coinbase-bot/api_key.json
+2025-09-01 18:00:31 | INFO  | [BOT  ] Coinbase client initialized (sandbox: True)
+2025-09-01 18:00:31 | INFO  | [API  ] Starting get_accounts()
+2025-09-01 18:00:32 | INFO  | [API  ] Completed get_accounts in 0.471s - Returned 49 items
+

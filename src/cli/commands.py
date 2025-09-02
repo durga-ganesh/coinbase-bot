@@ -55,7 +55,7 @@ def load_environment():
         from dotenv import load_dotenv
         load_dotenv()
     except ImportError:
-        logger.warning("python-dotenv not installed, using system environment variables")
+        logger.warning("[ENV  ] python-dotenv not installed, using system environment variables")
 
 
 @click.group(cls=CustomGroup, context_settings=dict(help_option_names=['-h', '--help']))
@@ -79,7 +79,7 @@ def cli(ctx, config):
     # Load configuration
     try:
         ctx.obj['config'] = load_config(config)
-        logger.info("Configuration loaded successfully")
+        logger.info("[BOT  ] Configuration loaded successfully")
     except Exception as e:
         console.print(f"[red]Error loading configuration: {e}[/red]")
         sys.exit(1)
@@ -89,6 +89,8 @@ def cli(ctx, config):
 @click.pass_context
 def balance(ctx):
     """💰 Get account balances"""
+    logger.info("[OPER ] Getting account balances")
+    
     try:
         client = CoinbaseClient(ctx.obj['config'])
         accounts = client.get_accounts()
@@ -138,6 +140,8 @@ def balance(ctx):
 @click.pass_context
 def price(ctx, product_id):
     """📈 Get current price and 24h stats"""
+    logger.info(f"[OPER ] Getting price information for {product_id.upper()}")
+    
     try:
         client = CoinbaseClient(ctx.obj['config'])
         current_price = client.get_current_price(product_id.upper())
@@ -145,34 +149,9 @@ def price(ctx, product_id):
         price_text = f"[bold cyan]{product_id.upper()}[/bold cyan]\n\n"
         price_text += f"[bold]Current Price:[/bold] [yellow]${current_price:.2f}[/yellow]\n"
         
-        # Get 24h data for context
-        end_time = datetime.now()
-        start_time = end_time - timedelta(days=1)
-        
-        market_data = client.get_market_data(
-            product_id.upper(),
-            granularity='3600',  # 1 hour
-            start=start_time.isoformat(),
-            end=end_time.isoformat()
-        )
-        
-        if not market_data.empty:
-            open_price = market_data['open'].iloc[0]
-            high_price = market_data['high'].max()
-            low_price = market_data['low'].min()
-            volume = market_data['volume'].sum()
-            
-            change = current_price - open_price
-            change_pct = (change / open_price) * 100 if open_price > 0 else 0
-            
-            # Color for change
-            change_color = "green" if change >= 0 else "red"
-            change_icon = "📈" if change >= 0 else "📉"
-            
-            price_text += f"{change_icon} [{change_color}]{change:+.2f} ({change_pct:+.2f}%)[/{change_color}]\n"
-            price_text += f"[dim]High:[/dim] [green]{high_price:.2f}[/green] "
-            price_text += f"[dim]Low:[/dim] [red]{low_price:.2f}[/red] "
-            price_text += f"[dim]Vol:[/dim] [blue]{volume:.0f}[/blue]"
+        # Skip market data for now due to granularity API issue
+        # TODO: Fix granularity parameter for Advanced Trade API
+        price_text += "[dim]Historical data temporarily unavailable[/dim]"
         
         panel = Panel(
             price_text,
@@ -192,6 +171,9 @@ def price(ctx, product_id):
 @click.pass_context
 def buy(ctx, product_id, amount, dry_run):
     """💰 Buy cryptocurrency (amount in USD)"""
+    action_type = "Simulating" if dry_run else "Executing"
+    logger.info(f"[OPER ] {action_type} buy order: ${amount} of {product_id.upper()}")
+    
     try:
         client = CoinbaseClient(ctx.obj['config'])
         product_id = product_id.upper()
@@ -239,6 +221,9 @@ def buy(ctx, product_id, amount, dry_run):
 @click.pass_context
 def sell(ctx, product_id, quantity, dry_run):
     """💸 Sell cryptocurrency (quantity in base currency)"""
+    action_type = "Simulating" if dry_run else "Executing" 
+    logger.info(f"[OPER ] {action_type} sell order: {quantity} {product_id.upper()}")
+    
     try:
         client = CoinbaseClient(ctx.obj['config'])
         product_id = product_id.upper()
@@ -350,7 +335,7 @@ def run_strategy(ctx, strategy_name, product_id, amount, dry_run):
         
         market_data = client.get_market_data(
             product_id,
-            granularity='3600',  # 1 hour
+            granularity='SIXTY_MINUTE',  # Try different format
             start=start_time.isoformat(),
             end=end_time.isoformat()
         )
@@ -405,6 +390,9 @@ def run_strategy(ctx, strategy_name, product_id, amount, dry_run):
 @click.pass_context
 def orders(ctx, product_id, days):
     """📊 Get order history"""
+    product_display = product_id.upper() if product_id else "all products"
+    logger.info(f"[OPER ] Getting order history for {product_display}")
+    
     try:
         client = CoinbaseClient(ctx.obj['config'])
         orders = client.get_orders(product_id.upper() if product_id else None)
@@ -438,6 +426,8 @@ def orders(ctx, product_id, days):
 @click.pass_context
 def health(ctx):
     """🏥 Check system health"""
+    logger.info("[OPER ] Running system health check")
+    
     try:
         health_text = "[bold]System Health[/bold]\n\n"
         
@@ -455,14 +445,21 @@ def health(ctx):
         config = ctx.obj['config']
         health_text += f"[green]✓[/green] Config: Loaded ({len(config.strategies)} strategies)\n"
         
-        # Check environment variables
-        required_env = ['COINBASE_API_KEY', 'COINBASE_API_SECRET', 'COINBASE_PASSPHRASE']
+        # Check environment variables (updated for JSON key file authentication)
+        required_env = ['COINBASE_API_KEY_FILE']
         missing_env = [env for env in required_env if not os.getenv(env)]
         
         if missing_env:
             health_text += "[red]✗[/red] Environment: Missing vars\n"
         else:
-            health_text += "[green]✓[/green] Environment: Complete\n"
+            # Also check if the JSON key file actually exists
+            json_key_file = os.getenv('COINBASE_API_KEY_FILE')
+            if json_key_file and os.path.exists(json_key_file):
+                health_text += "[green]✓[/green] Environment: Complete\n"
+            elif json_key_file and not os.path.exists(json_key_file):
+                health_text += "[red]✗[/red] Environment: Key file not found\n"
+            else:
+                health_text += "[red]✗[/red] Environment: Missing vars\n"
         
         # Sandbox mode
         sandbox_mode = os.getenv('COINBASE_SANDBOX', 'true').lower() == 'true'
