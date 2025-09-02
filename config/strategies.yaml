@@ -1,0 +1,37 @@
+# Strategy configurations
+sma_crossover:
+  short_window: 10
+  long_window: 30
+  min_volume: 1000000  # Minimum 24h volume
+
+rsi_strategy:
+  rsi_period: 14
+  oversold_threshold: 30
+  overbought_threshold: 70
+  min_rsi_change: 5
+
+volatility_breakout:
+  lookback_period: 20
+  volatility_multiplier: 2.0
+  min_volume: 500000
+
+mean_reversion:
+  lookback_period: 20
+  std_multiplier: 2.0
+  hold_period: 5
+
+momentum:
+  momentum_period: 10
+  threshold: 0.02
+  confirmation_period: 3
+
+bollinger_bands:
+  period: 20
+  std_multiplier: 2.0
+  oversold_pct: 0.05
+  overbought_pct: 0.95
+
+macd:
+  fast_period: 12
+  slow_period: 26
+  signal_period: 9

@@ -1,0 +1,9 @@
+coinbase-advanced-py==1.8.2
+pandas>=2.0.0
+numpy>=1.20.0
+click>=8.0.0
+pyyaml>=6.0
+requests>=2.28.0
+python-dotenv>=0.19.0
+rich>=13.0.0
+urllib3<2.0  # Compatible with LibreSSL on macOS
